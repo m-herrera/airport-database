@@ -101,7 +101,7 @@ CREATE TABLE PuestoAerolinea
 (
     IdPuestoAerolinea INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     Nombre            TEXT    NOT NULL,
-    SalarioBase       TEXT    NOT NULL
+    SalarioBase       INTEGER NOT NULL
 );
 
 
@@ -109,7 +109,7 @@ CREATE TABLE PuestoAeropuerto
 (
     IdPuestoAeropuerto INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     Nombre             TEXT    NOT NULL,
-    SalarioBase        TEXT    NOT NULL
+    SalarioBase        INTEGER NOT NULL
 );
 
 
@@ -128,7 +128,7 @@ CREATE TABLE Salario
     IdSalario  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdEmpleado INTEGER NOT NULL,
     Fecha      DATE    NOT NULL,
-    Salario    TEXT    NOT NULL,
+    Salario    INTEGER NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado (IdEmpleado)
 );
 
@@ -168,6 +168,16 @@ CREATE TABLE AvionAerolinea
     IdAerolinea INTEGER NOT NULL,
     FOREIGN KEY (IdAvion) REFERENCES Avion (IdAvion),
     FOREIGN KEY (IdAerolinea) REFERENCES Aerolinea (IdAerolinea)
+);
+
+
+CREATE TABLE AvionAeropuerto
+(
+    IdAvion      INTEGER NOT NULL,
+    IdAeropuerto INTEGER NOT NULL,
+    Fecha        DATE    NOT NULL,
+    FOREIGN KEY (IdAvion) REFERENCES Avion (IdAvion),
+    FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto (IdAeropuerto)
 );
 
 
