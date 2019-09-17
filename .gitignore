@@ -2,3 +2,7 @@
 .DS_Store
 
 *.db
+
+.idea/workspace.xml
+
+.idea/

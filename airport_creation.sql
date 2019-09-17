@@ -209,7 +209,7 @@ CREATE TABLE EmpleadoAerolinea
     FOREIGN KEY (IdPuestoAerolinea) REFERENCES PuestoAerolinea (IdPuestoAerolinea)
 );
 
-CREATE TABLE EmpleadoAepuerto
+CREATE TABLE EmpleadoAeropuerto
 (
     IdEmpleado         INTEGER NOT NULL,
     IdAeropuerto       INTEGER NOT NULL,
@@ -251,7 +251,7 @@ CREATE TABLE RepuestoFactura
 (
     IdRepuesto INTEGER NOT NULL,
     IdFactura  INTEGER NOT NULL,
-    Codigo     TEXT    NOT NULL UNIQUE,
+    Codigo     TEXT    NOT NULL,
     FOREIGN KEY (IdRepuesto) REFERENCES Repuesto (IdRepuesto),
     FOREIGN KEY (IdFactura) REFERENCES Factura (IdFactura)
 );
