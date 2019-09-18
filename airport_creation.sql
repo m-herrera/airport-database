@@ -3,7 +3,6 @@ CREATE TABLE Aerolinea
     IdAerolinea INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     Codigo      TEXT    NOT NULL,
     Nombre      TEXT    NOT NULL
-    -- Cantidad de Empleados
 );
 
 
@@ -26,8 +25,9 @@ CREATE TABLE Avion
     Modelo               TEXT    NOT NULL,
     CapacidadTripulacion INTEGER NOT NULL,
     CapacidadItinerario  INTEGER NOT NULL,
-    Estado               TEXT    NOT NULL,
-    FOREIGN KEY (IdFabricante) REFERENCES Fabricante (IdFabricante)
+    IdEstadoAvion        INTEGER NOT NULL,
+    FOREIGN KEY (IdFabricante) REFERENCES Fabricante (IdFabricante),
+    FOREIGN KEY (IdEstadoAvion) REFERENCES EstadoAvion (IdEstadoAvion)
 );
 
 
@@ -35,6 +35,7 @@ CREATE TABLE Bodega
 (
     IdBodega     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdAeropuerto INTEGER NOT NULL,
+    Nombre       TEXT    NOT NULL,
     FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto (IdAeropuerto)
 );
 
@@ -50,6 +51,21 @@ CREATE TABLE Empleado
     Horario        TEXT    NOT NULL,
     Direccion      TEXT    NOT NULL
 );
+
+
+CREATE TABLE EstadoAvion
+(
+    IdEstadoAvion INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    Estado        TEXT    NOT NULL
+);
+
+
+CREATE TABLE EstadoVuelo
+(
+    IdEstadoVuelo INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    Estado        TEXT    NOT NULL
+);
+
 
 CREATE TABLE Fabricante
 (
@@ -93,7 +109,9 @@ CREATE TABLE Pasaporte
 (
     IdPasaporte      INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     Codigo           TEXT    NOT NULL,
-    FechaVencimiento DATE    NOT NULL
+    FechaVencimiento DATE    NOT NULL,
+    IdPasajero       INTEGER NOT NULL,
+    FOREIGN KEY (IdPasajero) REFERENCES Pasajero (IdPasajero)
 );
 
 
@@ -136,17 +154,20 @@ CREATE TABLE Salario
 
 CREATE TABLE Vuelo
 (
-    IdVuelo      INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    IdAvion      INTEGER NOT NULL,
-    Numero       TEXT    NOT NULL,
-    Destino      TEXT    NOT NULL,
-    Origen       TEXT    NOT NULL,
-    FechaLlegada DATE    NOT NULL,
-    HoraLlegada  TIME    NOT NULL,
-    FechaSalida  DATE    NOT NULL,
-    HoraSalida   TIME    NOT NULL,
-    Estado       TEXT    NOT NULL,
-    FOREIGN KEY (IdAvion) REFERENCES Avion (IdAvion)
+    IdVuelo             INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    IdAvion             INTEGER NOT NULL,
+    Numero              TEXT    NOT NULL,
+    IdAeropuertoDestino INTEGER NOT NULL,
+    IdAeropuertoOrigen  INTEGER NOT NULL,
+    FechaLlegada        DATE    NOT NULL,
+    HoraLlegada         TIME    NOT NULL,
+    FechaSalida         DATE    NOT NULL,
+    HoraSalida          TIME    NOT NULL,
+    IdEstadoVuelo       INTEGER NOT NULL,
+    FOREIGN KEY (IdAvion) REFERENCES Avion (IdAvion),
+    FOREIGN KEY (IdAeropuertoDestino) REFERENCES Aeropuerto (IdAeropuerto),
+    FOREIGN KEY (IdAeropuertoOrigen) REFERENCES Aeropuerto (IdAeropuerto),
+    FOREIGN KEY (IdEstadoVuelo) REFERENCES EstadoVuelo (IdEstadoVuelo)
 );
 
 
@@ -170,15 +191,6 @@ CREATE TABLE AvionAerolinea
     FOREIGN KEY (IdAerolinea) REFERENCES Aerolinea (IdAerolinea)
 );
 
-
-CREATE TABLE AvionAeropuerto
-(
-    IdAvion      INTEGER NOT NULL,
-    IdAeropuerto INTEGER NOT NULL,
-    Fecha        DATE    NOT NULL,
-    FOREIGN KEY (IdAvion) REFERENCES Avion (IdAvion),
-    FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto (IdAeropuerto)
-);
 
 
 CREATE TABLE AvionBodega
@@ -214,6 +226,7 @@ CREATE TABLE EmpleadoAerolinea
     IdAerolinea       INTEGER NOT NULL,
     IdPuestoAerolinea INTEGER NOT NULL,
     Codigo            TEXT    NOT NULL,
+    FechaInicio       DATE    NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado (IdEmpleado),
     FOREIGN KEY (IdAerolinea) REFERENCES Aerolinea (IdAerolinea),
     FOREIGN KEY (IdPuestoAerolinea) REFERENCES PuestoAerolinea (IdPuestoAerolinea)
@@ -225,6 +238,7 @@ CREATE TABLE EmpleadoAeropuerto
     IdAeropuerto       INTEGER NOT NULL,
     IdPuestoAeropuerto INTEGER NOT NULL,
     Codigo             TEXT    NOT NULL,
+    FechaInicio        DATE    NOT NULL,
     FOREIGN KEY (IdEmpleado) REFERENCES Empleado (IdEmpleado),
     FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto (IdAeropuerto),
     FOREIGN KEY (IdPuestoAeropuerto) REFERENCES PuestoAeropuerto (IdPuestoAeropuerto)
@@ -236,7 +250,7 @@ CREATE TABLE Factura
     IdFactura       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdTaller        INTEGER NOT NULL,
     IdAvion         INTEGER NOT NULL,
-    CostoReparacion TEXT    NOT NULL,
+    CostoReparacion INTEGER NOT NULL,
     FechaLlegada    DATE    NOT NULL,
     HoraLlegada     TIME    NOT NULL,
     FechaSalida     DATE    NOT NULL,
@@ -244,16 +258,6 @@ CREATE TABLE Factura
     Estado          TEXT    NOT NULL,
     FOREIGN KEY (IdTaller) REFERENCES Taller (IdTaller),
     FOREIGN KEY (IdAvion) REFERENCES Avion (IdAvion)
-
-);
-
-
-CREATE TABLE PasajeroPasaporte
-(
-    IdPasajero  INTEGER NOT NULL,
-    IdPasaporte INTEGER NOT NULL,
-    FOREIGN KEY (IdPasajero) REFERENCES Pasajero (IdPasajero),
-    FOREIGN KEY (IdPasaporte) REFERENCES Pasaporte (IdPasaporte)
 );
 
 
@@ -276,5 +280,4 @@ CREATE TABLE Tiquete
     -- Cantidad Equipaje
     FOREIGN KEY (IdPasajero) REFERENCES Pasajero (IdPasajero),
     FOREIGN KEY (IdVuelo) REFERENCES Vuelo (IdVuelo)
-
 );

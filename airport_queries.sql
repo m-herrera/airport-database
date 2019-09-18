@@ -1,109 +1,129 @@
-SELECT A.*, COUNT(*) AS CantidadEmpleados
-FROM EmpleadoAerolinea EA
-         INNER JOIN Aerolinea A ON EA.IdAerolinea = A.IdAerolinea
-GROUP BY EA.IdAerolinea
+-- Top 10 aerolíneas con mayor cantidad de empleados
+SELECT Aerolinea.*, COUNT(*) AS CantidadEmpleados
+FROM EmpleadoAerolinea
+         INNER JOIN Aerolinea ON EmpleadoAerolinea.IdAerolinea = Aerolinea.IdAerolinea
+GROUP BY EmpleadoAerolinea.IdAerolinea
 ORDER BY CantidadEmpleados DESC
 LIMIT 10;
 
 
-SELECT A.*, COUNT(*) AS CantidadAerolineas
-FROM AerolineaAeropuerto AA
-         INNER JOIN Aeropuerto A ON AA.IdAeropuerto = A.IdAeropuerto
-GROUP BY A.IdAeropuerto
+-- Top 10 aeropuertos con más aerolíneas
+SELECT Aeropuerto.*, COUNT(*) AS CantidadAerolineas
+FROM AerolineaAeropuerto
+         INNER JOIN Aeropuerto ON AerolineaAeropuerto.IdAeropuerto = Aeropuerto.IdAeropuerto
+GROUP BY Aeropuerto.IdAeropuerto
 ORDER BY CantidadAerolineas DESC
 LIMIT 10;
 
 
-SELECT F.Nombre, COUNT(*) AS Modelos
-FROM Avion A
-         INNER JOIN Fabricante F on A.IdFabricante = F.IdFabricante
-GROUP BY A.IdFabricante
-ORDER BY Modelos DESC
-LIMIT 10;
+-- Toda la información de un empleado de la aerolínea y del aeropuerto con el sueldo más alto
+SELECT *
+FROM (
+         SELECT Empleado.*, Salario.Salario
+         FROM EmpleadoAerolinea
+                  INNER JOIN Empleado ON EmpleadoAerolinea.IdEmpleado = Empleado.IdEmpleado
+                  INNER JOIN Salario ON Empleado.IdEmpleado = Salario.IdEmpleado
+         ORDER BY Salario.Salario DESC
+         LIMIT 1
+     )
+UNION
+SELECT *
+FROM (
+         SELECT E.*, S.Salario
+         FROM EmpleadoAeropuerto EA2
+                  INNER JOIN Empleado E ON EA2.IdEmpleado = E.IdEmpleado
+                  INNER JOIN Salario S ON E.IdEmpleado = S.IdEmpleado
+         ORDER BY S.Salario DESC
+         LIMIT 1);
 
 
-SELECT A.Nombre, COUNT(*) AS Reparacion
+-- Promedio de salario para los aeropuertos con mayor numero de empleados
+SELECT Aeropuerto.Nombre, AVG(ALL Salario.Salario), COUNT(*) AS Empleados
+FROM EmpleadoAeropuerto
+         INNER JOIN Empleado ON EmpleadoAeropuerto.IdEmpleado = Empleado.IdEmpleado
+         INNER JOIN Salario ON Empleado.IdEmpleado = Salario.IdEmpleado
+         INNER JOIN Aeropuerto ON EmpleadoAeropuerto.IdAeropuerto = Aeropuerto.IdAeropuerto
+GROUP BY Aeropuerto.IdAeropuerto
+ORDER BY Empleados DESC
+LIMIT 3;
+--Límite elegido arbitrariamente
+
+------------------------------------------------
+
+-- Cantidad de aviones en una aerolínea que están en estado de reparacion
+SELECT Aerolinea.Nombre, COUNT(*) AS Reparacion
 FROM Avion
-         INNER JOIN AvionAerolinea AA on Avion.IdAvion = AA.IdAvion
-         INNER JOIN Aerolinea A on AA.IdAerolinea = A.IdAerolinea
-GROUP BY A.IdAerolinea
+         INNER JOIN AvionAerolinea ON Avion.IdAvion = AvionAerolinea.IdAvion
+         INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
+WHERE Avion.IdEstadoAvion == 3
+GROUP BY Aerolinea.IdAerolinea
 ORDER BY Reparacion DESC;
 
 
-SELECT B.IdBodega, COUNT(*) As AvionesInactivos
-FROM Bodega B
-         INNER JOIN AvionBodega AB on B.IdBodega = AB.IdBodega
-         INNER JOIN Avion A on AB.IdAvion = A.IdAvion
-WHERE A.Estado == 'Inactivo';
-
-
-SELECT A.Nombre, AVG(ALL S.Salario), COUNT(*) AS Empleados
-FROM EmpleadoAepuerto EA
-         INNER JOIN Empleado E on EA.IdEmpleado = E.IdEmpleado
-         INNER JOIN Salario S on E.IdEmpleado = S.IdEmpleado
-         INNER JOIN Aeropuerto A on EA.IdAeropuerto = A.IdAeropuerto
-GROUP BY A.IdAeropuerto
-ORDER BY Empleados DESC;
-
-
-SELECT Factura.CostoReparacion, A.Modelo, F.Nombre, A.Codigo, A2.Nombre, A3.Nombre
+-- Costo de reparación, modelo, fabricante y código de avión para una aerolínea de un aeropuerto específico
+SELECT Factura.CostoReparacion,
+       Avion.Modelo,
+       Fabricante.Nombre AS NombreFabricante,
+       Avion.Codigo,
+       Aerolinea.Nombre  AS NombreAerolinea,
+       Aeropuerto.Nombre AS NombreAeropuerto
 FROM Factura
-         INNER JOIN Avion A on Factura.IdAvion = A.IdAvion
-         INNER JOIN Fabricante F on A.IdFabricante = F.IdFabricante
-         INNER JOIN AvionAerolinea AA on A.IdAvion = AA.IdAvion
-         INNER JOIN Aerolinea A2 on AA.IdAerolinea = A2.IdAerolinea
-         INNER JOIN AerolineaAeropuerto AA2 on A2.IdAerolinea = AA2.IdAerolinea
-         INNER JOIN Aeropuerto A3 on AA2.IdAeropuerto = A3.IdAeropuerto
-
-SELECT A.Nombre, AA.Fecha, COUNT(*)
-FROM Aeropuerto A
-         INNER JOIN AvionAeropuerto AA on A.IdAeropuerto = AA.IdAeropuerto
-         INNER JOIN Avion A on AA.IdAvion = A.IdAvion
-WHERE A.Estado == 'activo'
+         INNER JOIN Avion ON Factura.IdAvion = Avion.IdAvion
+         INNER JOIN Fabricante ON Avion.IdFabricante = Fabricante.IdFabricante
+         INNER JOIN AvionAerolinea ON Avion.IdAvion = AvionAerolinea.IdAvion
+         INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
+         INNER JOIN AerolineaAeropuerto ON Aerolinea.IdAerolinea = AerolineaAeropuerto.IdAerolinea
+         INNER JOIN Aeropuerto ON AerolineaAeropuerto.IdAeropuerto = Aeropuerto.IdAeropuerto
+WHERE NombreAerolinea == ''
+  AND NombreAeropuerto == '';
 
 
-
-/*
-SELECT EAerolinea.*
-FROM Salario S
-INNER JOIN Empleado E ON S.IdEmpleado = E.IdEmpleado
-INNER JOIN EmpleadoAerolinea EAerolinea ON E.IdEmpleado = EAerolinea.IdEmpleado
-ORDER BY S.Salario DESC
-LIMIT 1;
-
-SELECT EAeropuerto.*
-FROM Salario S
-INNER JOIN Empleado E ON S.IdEmpleado = E.IdEmpleado
-INNER JOIN EmpleadoAepuerto EAeropuerto ON E.IdEmpleado = EAeropuerto.IdEmpleado
-ORDER BY S.Salario DESC
-LIMIT 1
-
-INSERT INTO Empleado(IdEmpleado, Nombre, Apellido1, Apellido2, Cedula, CuentaBancaria, Horario, Direccion)
-VALUES (1, 'NombreEmpleado1', 'Apellido1Empleado1', 'Apellido2Empleado1', 'CedulaEmpleado1', 'CuentaEmpleado1',
-        'HorarioEmpleado1', 'DireccionEmpleado1'),
-       (2, 'NombreEmpleado2', 'Apellido1Empleado2', 'Apellido2Empleado2', 'CedulaEmpleado2', 'CuentaEmpleado2',
-        'HorarioEmpleado2', 'DireccionEmpleado2'),
-       (3, 'NombreEmpleado3', 'Apellido1Empleado3', 'Apellido2Empleado3', 'CedulaEmpleado3', 'CuentaEmpleado3',
-        'HorarioEmpleado3', 'DireccionEmpleado3'),
-       (4, 'NombreEmpleado4', 'Apellido1Empleado4', 'Apellido2Empleado4', 'CedulaEmpleado4', 'CuentaEmpleado4',
-        'HorarioEmpleado4', 'DireccionEmpleado4');
+--  Cantidad de aviones activos en un aeropuerto
+SELECT Aeropuerto.Nombre, Vuelo.FechaLlegada, COUNT(*)
+FROM Aeropuerto
+         INNER JOIN Vuelo ON Aeropuerto.IdAeropuerto = Vuelo.IdAeropuertoDestino
+         INNER JOIN Avion ON Vuelo.IdAvion = Avion.IdAvion
+WHERE Avion.IdEstadoAvion == 1
+  AND Aeropuerto.Nombre == ''
+  AND FechaLlegada == '';
 
 
-INSERT INTO Aerolinea(IdAerolinea, Codigo, Nombre)
-VALUES (1, 'A1', 'NombreAerolinea1'),
-       (2, 'A2', 'NombreAerolinea2'),
-       (3, 'A3', 'NombreAerolinea3'),
-       (4, 'A4', 'NombreAerolinea4');
+-- Promedio de costo de reparación de los aviones para un aeropuerto específico
+SELECT Aeropuerto.Nombre, AVG(ALL Factura.CostoReparacion)
+FROM Aeropuerto
+         INNER JOIN Taller ON Aeropuerto.IdAeropuerto = Taller.IdAeropuerto
+         INNER JOIN Factura ON Taller.IdTaller = Factura.IdTaller
+WHERE Aeropuerto.Nombre == '';
+
+-- Promedio de costo de reparación de los aviones para una aerolinea específico
+SELECT Aerolinea.Nombre, AVG(ALL Factura.CostoReparacion)
+FROM Aerolinea
+         INNER JOIN AvionAerolinea on Aerolinea.IdAerolinea = AvionAerolinea.IdAerolinea
+         INNER JOIN Avion ON AvionAerolinea.IdAvion = Avion.IdAvion
+         INNER JOIN Factura ON Factura.IdAvion = Avion.IdAvion
+WHERE Aerolinea.Nombre == '';
 
 
-INSERT INTO PuestoAerolinea(IdPuestoAerolinea, Nombre, SalarioBase)
-VALUES (1, 'Piloto', '1000000'),
-       (2, 'Copiloto', '500000'),
-       (3, 'Azafata', '400000');
+-- Cantidad de aviones inactivos dentro de una bodega
+SELECT Bodega.Nombre, COUNT(*) As AvionesInactivos
+FROM Bodega
+         INNER JOIN AvionBodega ON Bodega.IdBodega = AvionBodega.IdBodega
+         INNER JOIN Avion ON AvionBodega.IdAvion = Avion.IdAvion
+WHERE Avion.IdEstadoAvion == 2
+  AND Bodega.Nombre == '';
 
 
-INSERT INTO EmpleadoAerolinea(IdEmpleado, IdAerolinea, IdPuestoAerolinea, Codigo)
-VALUES (1, 1, 1, 'P1'),
-       (2, 1, 2, 'C2'),
-       (3, 2, 3, 'A3'),
-       (4, 3, 1, 'P4');*/
+-- Nombre de los fabricantes con la mayor cantidad de modelos
+SELECT Fabricante.Nombre, COUNT(*) AS Modelos
+FROM Avion
+         INNER JOIN Fabricante ON Avion.IdFabricante = Fabricante.IdFabricante
+GROUP BY Avion.IdFabricante
+ORDER BY Modelos DESC
+LIMIT 3;
+--Límite elegido arbitrariamente
+
+
+-- Cantidad de aerolíneas que contienen la letra "A" en el nombre. De este resultado además deben de mostrar cuáles tienen más vuelos activos
+
+
+-- Intervalo de horas con la mayor llegada de aviones para un aeropuerto
