@@ -69,7 +69,8 @@ SELECT Factura.CostoReparacion,
        Aeropuerto.Nombre AS NombreAeropuerto
 FROM Factura
          INNER JOIN Avion ON Factura.IdAvion = Avion.IdAvion
-         INNER JOIN Fabricante ON Avion.IdFabricante = Fabricante.IdFabricante
+         INNER JOIN Modelo ON Avion.IdModelo = Modelo.IdModelo
+         INNER JOIN Fabricante ON Modelo.IdFabricante = Fabricante.IdFabricante
          INNER JOIN AvionAerolinea ON Avion.IdAvion = AvionAerolinea.IdAvion
          INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
          INNER JOIN AerolineaAeropuerto ON Aerolinea.IdAerolinea = AerolineaAeropuerto.IdAerolinea
@@ -116,8 +117,9 @@ WHERE Avion.IdEstadoAvion == 2
 -- Nombre de los fabricantes con la mayor cantidad de modelos
 SELECT Fabricante.Nombre, COUNT(*) AS Modelos
 FROM Avion
-         INNER JOIN Fabricante ON Avion.IdFabricante = Fabricante.IdFabricante
-GROUP BY Avion.IdFabricante
+         INNER JOIN Modelo ON Avion.IdModelo = Modelo.IdModelo
+         INNER JOIN Fabricante ON Modelo.IdFabricante = Fabricante.IdFabricante
+GROUP BY Modelo.IdFabricante
 ORDER BY Modelos DESC
 LIMIT 3;
 --Límite elegido arbitrariamente

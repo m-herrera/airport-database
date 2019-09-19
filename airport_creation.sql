@@ -20,13 +20,13 @@ CREATE TABLE Aeropuerto
 CREATE TABLE Avion
 (
     IdAvion              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    IdFabricante         INTEGER NOT NULL,
+    IdModelo             INTEGER NOT NULL,
     Codigo               TEXT    NOT NULL,
     Modelo               TEXT    NOT NULL,
     CapacidadTripulacion INTEGER NOT NULL,
     CapacidadItinerario  INTEGER NOT NULL,
     IdEstadoAvion        INTEGER NOT NULL,
-    FOREIGN KEY (IdFabricante) REFERENCES Fabricante (IdFabricante),
+    FOREIGN KEY (IdModelo) REFERENCES Modelo (IdModelo),
     FOREIGN KEY (IdEstadoAvion) REFERENCES EstadoAvion (IdEstadoAvion)
 );
 
@@ -92,6 +92,13 @@ CREATE TABLE Taller
     FOREIGN KEY (IdAeropuerto) REFERENCES Aeropuerto (IdAeropuerto)
 );
 
+CREATE TABLE Modelo
+(
+    IdModelo     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    IdFabricante INTEGER NOT NULL,
+    Modelo       TEXT    NOT NULL,
+    FOREIGN KEY (IdFabricante) REFERENCES Fabricante (IdFabricante)
+);
 
 CREATE TABLE Pasajero
 (
