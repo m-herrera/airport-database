@@ -7,11 +7,12 @@ CantidadAerolineas = 2 * mult
 CantidadAeropuertos = 4 * mult
 CantidadFabricantes = 1 * mult
 CantidadAerolineaAeropuerto = CantidadAerolineas * CantidadAeropuertos // 4
+CantidadModelos = CantidadFabricantes * 2
 CantidadAviones = 5 * mult
 CantidadBodegas = 5 * mult
 CantidadEmpleados = CantidadAerolineaAeropuerto
 CantidadVuelos = CantidadAviones * 2
-CantidadSalarios = CantidadEmpleados * 2
+CantidadSalarios = CantidadEmpleados
 CantidadPasajeros = CantidadVuelos * 200
 CantidadTiquetes = CantidadVuelos * 100
 CantidadEquipajes = CantidadTiquetes * 2
@@ -20,7 +21,7 @@ CantidadPasaportes = CantidadPasajeros * 2
 CantidadPuestosAerolinea = 5
 CantidadPuestosAeropuerto = 5
 CantidadRepuestos = CantidadAviones
-CantidadAvionAerolinea = CantidadAviones * 2
+CantidadAvionAerolinea = CantidadAviones
 CantidadAvionesBodega = CantidadAviones * 2
 CantidadControladores = CantidadAviones * 1
 CantidadEmpleadosAerolinea = CantidadEmpleados // 2
@@ -82,18 +83,23 @@ with con:
     estadosAvion = [(1, "Activo"), (2, "Inactivo"), (3, "Reparación")]
     cur.executemany("INSERT INTO EstadoAvion VALUES(?, ?)", estadosAvion)
 
+    modelos = []
+    models = gen.gen_data_series(CantidadModelos, data_type='license_plate')
+    for i in range(1, CantidadModelos):
+        modelos.append((i, choice(fabricantes)[0], models[i-1]))
+    cur.executemany("INSERT INTO Modelo VALUES(?, ?, ?)", modelos)
 
     aviones = []
     names = gen.gen_data_series(CantidadAviones, data_type='company')
     for i in range(1, CantidadAviones):
         name = names[i-1]
-        aviones.append((i, choice(fabricantes)[0],
+        aviones.append((i, choice(modelos)[0],
                         randrange(1000, 10000),
-                        "Modelo",
                         randrange(3, 10),
                         randrange(40, 250),
                         choice(estadosAvion)[0]))
-    cur.executemany("INSERT INTO Avion VALUES(?, ?, ?, ?, ?, ?, ?)", aviones)
+    cur.executemany("INSERT INTO Avion VALUES(?, ?, ?, ?, ?, ?)", aviones)
+    
 
 
     bodegas = []
@@ -138,7 +144,7 @@ with con:
     salarios = []
     fechas = gen.gen_data_series(CantidadSalarios, data_type='date')
     for i in range(1, CantidadSalarios):
-        salarios.append((i, choice(empleados)[0], fechas[i-1],
+        salarios.append((i, empleados[i-1][0], fechas[i-1],
                        randrange(50000, 10000000)))
 
     cur.executemany("INSERT INTO Salario VALUES(?, ?, ?, ?)", salarios)
@@ -211,7 +217,7 @@ with con:
 
     avionesaerolinea = []
     for i in range(1, CantidadAvionAerolinea):
-        avionesaerolinea.append((choice(aviones)[0], choice(aerolineas)[0]))
+        avionesaerolinea.append((aviones[i-1][0], choice(aerolineas)[0]))
 
     cur.executemany("INSERT INTO AvionAerolinea VALUES(?, ?)", avionesaerolinea)
 
@@ -244,7 +250,7 @@ with con:
     dates = gen.gen_data_series(CantidadPasaportes, data_type='date')
     codes = gen.gen_data_series(CantidadEmpleadosAerolinea, data_type='license_plate')
     for i in range(1, CantidadEmpleadosAerolinea):
-        empleadosAerolinea.append((choice(empleados)[0], choice(aerolineas)[0],
+        empleadosAerolinea.append((empleados[i-1][0], choice(aerolineas)[0],
                        choice(puestosaerolinea)[0], codes[i-1], dates[i-1]))
 
     cur.executemany("INSERT INTO EmpleadoAerolinea VALUES(?, ?, ?, ?, ?)", empleadosAerolinea)
@@ -254,7 +260,7 @@ with con:
     dates = gen.gen_data_series(CantidadPasaportes, data_type='date')
     codes = gen.gen_data_series(CantidadEmpleadosAeropuerto, data_type='license_plate')
     for i in range(1, CantidadEmpleadosAeropuerto):
-        empleadosAeropuerto.append((choice(empleados)[0], choice(aeropuertos)[0],
+        empleadosAeropuerto.append((empleados[CantidadEmpleadosAerolinea + i - 1][0], choice(aeropuertos)[0],
                        choice(puestosaeropuerto)[0], codes[i-1], dates[i-1]))
 
     cur.executemany("INSERT INTO EmpleadoAeropuerto VALUES(?, ?, ?, ?, ?)", empleadosAeropuerto)

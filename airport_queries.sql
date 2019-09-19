@@ -54,14 +54,14 @@ FROM Avion
          INNER JOIN AvionAerolinea ON Avion.IdAvion = AvionAerolinea.IdAvion
          INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
 WHERE Avion.IdEstadoAvion == 3
-  AND Aerolinea.Nombre == 'Weaver-griffith'
+  AND Aerolinea.Nombre == 'Graves-johnson'
 GROUP BY Aerolinea.IdAerolinea
 ORDER BY Reparacion DESC;
 
 
 -- Costo de reparación, modelo, fabricante y código de avión para una aerolínea de un aeropuerto específico
 SELECT Factura.CostoReparacion,
-       Avion.Modelo,
+       Avion.IdModelo,
        Fabricante.Nombre AS NombreFabricante,
        Avion.Codigo
 FROM Factura
@@ -72,8 +72,8 @@ FROM Factura
          INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
          INNER JOIN AerolineaAeropuerto ON Aerolinea.IdAerolinea = AerolineaAeropuerto.IdAerolinea
          INNER JOIN Aeropuerto ON AerolineaAeropuerto.IdAeropuerto = Aeropuerto.IdAeropuerto
-WHERE Aerolinea.Nombre == 'Weaver-griffith'
-  AND Aeropuerto.Nombre == 'Smithville';
+WHERE Aerolinea.Nombre == 'Graves-johnson'
+  AND Aeropuerto.Nombre == 'Morganland';
 
 
 --  Cantidad de aviones activos en un aeropuerto
@@ -82,8 +82,8 @@ FROM Aeropuerto
          INNER JOIN Vuelo ON Aeropuerto.IdAeropuerto = Vuelo.IdAeropuertoDestino
          INNER JOIN Avion ON Vuelo.IdAvion = Avion.IdAvion
 WHERE Avion.IdEstadoAvion == 1
-  AND Aeropuerto.Nombre == 'Grantfort'
-  AND FechaLlegada == '2018-11-25'
+  AND Aeropuerto.Nombre == 'Ashleymouth'
+  AND FechaLlegada == '1989-11-04'
 GROUP BY Vuelo.FechaLlegada, Aeropuerto.Nombre;
 
 
@@ -92,7 +92,7 @@ SELECT Aeropuerto.Nombre, AVG(ALL Factura.CostoReparacion) AS PromedioReparacion
 FROM Aeropuerto
          INNER JOIN Taller ON Aeropuerto.IdAeropuerto = Taller.IdAeropuerto
          INNER JOIN Factura ON Taller.IdTaller = Factura.IdTaller
-WHERE Aeropuerto.Nombre == 'Smithville';
+WHERE Aeropuerto.Nombre == 'Ashleymouth';
 
 -- Promedio de costo de reparación de los aviones para una aerolinea específico
 SELECT Aerolinea.Nombre, AVG(ALL Factura.CostoReparacion) AS PromedioReparacion
@@ -100,7 +100,7 @@ FROM Aerolinea
          INNER JOIN AvionAerolinea on Aerolinea.IdAerolinea = AvionAerolinea.IdAerolinea
          INNER JOIN Avion ON AvionAerolinea.IdAvion = Avion.IdAvion
          INNER JOIN Factura ON Factura.IdAvion = Avion.IdAvion
-WHERE Aerolinea.Nombre == 'Weaver-griffith';
+WHERE Aerolinea.Nombre == 'Graves-johnson';
 
 
 -- Cantidad de aviones inactivos dentro de una bodega
@@ -109,13 +109,12 @@ FROM Bodega
          INNER JOIN AvionBodega ON Bodega.IdBodega = AvionBodega.IdBodega
          INNER JOIN Avion ON AvionBodega.IdAvion = Avion.IdAvion
 WHERE Avion.IdEstadoAvion == 2
-  AND Bodega.Nombre == 'Chad Perry';
+  AND Bodega.Nombre == 'Tiffany York';
 
 
 -- Nombre de los fabricantes con la mayor cantidad de modelos
 SELECT Fabricante.Nombre, COUNT(*) AS Modelos
-FROM Avion
-         INNER JOIN Modelo ON Avion.IdModelo = Modelo.IdModelo
+FROM Modelo
          INNER JOIN Fabricante ON Modelo.IdFabricante = Fabricante.IdFabricante
 GROUP BY Modelo.IdFabricante
 ORDER BY Modelos DESC
@@ -137,5 +136,5 @@ WHERE AA.Nombre LIKE '%a%';
 SELECT (strftime('%H', V.HoraLlegada)) AS Hora, Count(*) AS Vuelos
 FROM Vuelo V
          INNER JOIN Aeropuerto A on V.IdAeropuertoOrigen = A.IdAeropuerto
-WHERE A.Nombre == 'Grantfort'
+WHERE A.Nombre == 'Ashleymouth'
 GROUP BY Hora;

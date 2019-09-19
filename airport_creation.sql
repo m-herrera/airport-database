@@ -22,7 +22,6 @@ CREATE TABLE Avion
     IdAvion              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     IdModelo             INTEGER NOT NULL,
     Codigo               TEXT    NOT NULL,
-    Modelo               TEXT    NOT NULL,
     CapacidadTripulacion INTEGER NOT NULL,
     CapacidadItinerario  INTEGER NOT NULL,
     IdEstadoAvion        INTEGER NOT NULL,
