@@ -30,8 +30,8 @@ UNION
 SELECT *
 FROM (
          SELECT E.*, S.Salario
-         FROM EmpleadoAeropuerto EA2
-                  INNER JOIN Empleado E ON EA2.IdEmpleado = E.IdEmpleado
+         FROM EmpleadoAeropuerto
+                  INNER JOIN Empleado E ON EmpleadoAeropuerto.IdEmpleado = E.IdEmpleado
                   INNER JOIN Salario S ON E.IdEmpleado = S.IdEmpleado
          ORDER BY S.Salario DESC
          LIMIT 1);
@@ -46,9 +46,7 @@ FROM EmpleadoAeropuerto
 GROUP BY Aeropuerto.IdAeropuerto
 ORDER BY Empleados DESC
 LIMIT 3;
---Límite elegido arbitrariamente
 
-------------------------------------------------
 
 -- Cantidad de aviones en una aerolínea que están en estado de reparacion
 SELECT Aerolinea.Nombre, COUNT(*) AS Reparacion
@@ -56,6 +54,7 @@ FROM Avion
          INNER JOIN AvionAerolinea ON Avion.IdAvion = AvionAerolinea.IdAvion
          INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
 WHERE Avion.IdEstadoAvion == 3
+  AND Aerolinea.Nombre == 'Weaver-griffith'
 GROUP BY Aerolinea.IdAerolinea
 ORDER BY Reparacion DESC;
 
@@ -64,9 +63,7 @@ ORDER BY Reparacion DESC;
 SELECT Factura.CostoReparacion,
        Avion.Modelo,
        Fabricante.Nombre AS NombreFabricante,
-       Avion.Codigo,
-       Aerolinea.Nombre  AS NombreAerolinea,
-       Aeropuerto.Nombre AS NombreAeropuerto
+       Avion.Codigo
 FROM Factura
          INNER JOIN Avion ON Factura.IdAvion = Avion.IdAvion
          INNER JOIN Modelo ON Avion.IdModelo = Modelo.IdModelo
@@ -75,34 +72,35 @@ FROM Factura
          INNER JOIN Aerolinea ON AvionAerolinea.IdAerolinea = Aerolinea.IdAerolinea
          INNER JOIN AerolineaAeropuerto ON Aerolinea.IdAerolinea = AerolineaAeropuerto.IdAerolinea
          INNER JOIN Aeropuerto ON AerolineaAeropuerto.IdAeropuerto = Aeropuerto.IdAeropuerto
-WHERE NombreAerolinea == ''
-  AND NombreAeropuerto == '';
+WHERE Aerolinea.Nombre == 'Weaver-griffith'
+  AND Aeropuerto.Nombre == 'Smithville';
 
 
 --  Cantidad de aviones activos en un aeropuerto
-SELECT Aeropuerto.Nombre, Vuelo.FechaLlegada, COUNT(*)
+SELECT Aeropuerto.Nombre, Vuelo.FechaLlegada, COUNT(*) AS AvionesActivos
 FROM Aeropuerto
          INNER JOIN Vuelo ON Aeropuerto.IdAeropuerto = Vuelo.IdAeropuertoDestino
          INNER JOIN Avion ON Vuelo.IdAvion = Avion.IdAvion
 WHERE Avion.IdEstadoAvion == 1
-  AND Aeropuerto.Nombre == ''
-  AND FechaLlegada == '';
+  AND Aeropuerto.Nombre == 'Grantfort'
+  AND FechaLlegada == '2018-11-25'
+GROUP BY Vuelo.FechaLlegada, Aeropuerto.Nombre;
 
 
 -- Promedio de costo de reparación de los aviones para un aeropuerto específico
-SELECT Aeropuerto.Nombre, AVG(ALL Factura.CostoReparacion)
+SELECT Aeropuerto.Nombre, AVG(ALL Factura.CostoReparacion) AS PromedioReparacion
 FROM Aeropuerto
          INNER JOIN Taller ON Aeropuerto.IdAeropuerto = Taller.IdAeropuerto
          INNER JOIN Factura ON Taller.IdTaller = Factura.IdTaller
-WHERE Aeropuerto.Nombre == '';
+WHERE Aeropuerto.Nombre == 'Smithville';
 
 -- Promedio de costo de reparación de los aviones para una aerolinea específico
-SELECT Aerolinea.Nombre, AVG(ALL Factura.CostoReparacion)
+SELECT Aerolinea.Nombre, AVG(ALL Factura.CostoReparacion) AS PromedioReparacion
 FROM Aerolinea
          INNER JOIN AvionAerolinea on Aerolinea.IdAerolinea = AvionAerolinea.IdAerolinea
          INNER JOIN Avion ON AvionAerolinea.IdAvion = Avion.IdAvion
          INNER JOIN Factura ON Factura.IdAvion = Avion.IdAvion
-WHERE Aerolinea.Nombre == '';
+WHERE Aerolinea.Nombre == 'Weaver-griffith';
 
 
 -- Cantidad de aviones inactivos dentro de una bodega
@@ -111,7 +109,7 @@ FROM Bodega
          INNER JOIN AvionBodega ON Bodega.IdBodega = AvionBodega.IdBodega
          INNER JOIN Avion ON AvionBodega.IdAvion = Avion.IdAvion
 WHERE Avion.IdEstadoAvion == 2
-  AND Bodega.Nombre == '';
+  AND Bodega.Nombre == 'Chad Perry';
 
 
 -- Nombre de los fabricantes con la mayor cantidad de modelos
@@ -122,10 +120,22 @@ FROM Avion
 GROUP BY Modelo.IdFabricante
 ORDER BY Modelos DESC
 LIMIT 3;
---Límite elegido arbitrariamente
 
 
 -- Cantidad de aerolíneas que contienen la letra "A" en el nombre. De este resultado además deben de mostrar cuáles tienen más vuelos activos
-
+SELECT *
+FROM (SELECT A.*, COUNT(*) AS VuelosActivos
+      FROM Aerolinea A
+               INNER JOIN AvionAerolinea AA on A.IdAerolinea = AA.IdAerolinea
+               INNER JOIN Vuelo V on AA.IdAvion = V.IdAvion
+      WHERE V.IdEstadoVuelo == 1
+      GROUP BY A.IdAerolinea
+      ORDER BY VuelosActivos DESC) AA
+WHERE AA.Nombre LIKE '%a%';
 
 -- Intervalo de horas con la mayor llegada de aviones para un aeropuerto
+SELECT (strftime('%H', V.HoraLlegada)) AS Hora, Count(*) AS Vuelos
+FROM Vuelo V
+         INNER JOIN Aeropuerto A on V.IdAeropuertoOrigen = A.IdAeropuerto
+WHERE A.Nombre == 'Grantfort'
+GROUP BY Hora;
